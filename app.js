@@ -7,7 +7,7 @@ const toCurr = document.querySelector(".to select");
 const msg = document.querySelector(".msg");
 
 for (let select of dropdowns) {
-  for (currCode in countryList) {
+  for (let currCode in countryList) {
     let newOption = document.createElement("option");
     newOption.innerText = currCode;
     newOption.value = currCode;
@@ -25,21 +25,24 @@ for (let select of dropdowns) {
 }
 
 const updateExchangeRate = async () => {
-  let amount = document.querySelector(".amount input");
-  let amtVal = amount.value;
-  if (amtVal === "" || amtVal < 1) {
-    amtVal = 1;
-    amount.value = "1";
-  }
-  const URL = `${BASE_URL}/${fromCurr.value.toLowerCase()}.json`;
-  let response = await fetch(URL);
-  let data = await response.json();
-  let rate = data[fromCurr.value.toLowerCase()][toCurr.value.toLowerCase()];
+    try{
+    let amount = document.querySelector(".amount input");
+    let amtVal = amount.value;
+    if (amtVal === "" || amtVal < 1) {
+        amtVal = 1;
+        amount.value = "1";
+    }
+    const URL = `${BASE_URL}/${fromCurr.value.toLowerCase()}.json`;
+    let response = await fetch(URL);
+    let data = await response.json();
+    let rate = data[fromCurr.value.toLowerCase()][toCurr.value.toLowerCase()];
 
-  let finalAmount = amtVal * rate;
-  msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
-};
-
+    let finalAmount = amtVal * rate;
+    msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
+    } catch (error) {
+    console.error("Error fetching exchange rate:", error);
+    }
+}
 
 const updateFlag = (element) => {
   let currCode = element.value;
@@ -48,6 +51,20 @@ const updateFlag = (element) => {
   let img = element.parentElement.querySelector("img");
   img.src = newSrc;
 };
+
+document.querySelector(".fa-arrow-right-arrow-left").addEventListener("click", () => {
+  let temp = fromCurr.value;
+  fromCurr.value = toCurr.value;
+  toCurr.value = temp;
+
+  updateFlag(fromCurr);
+  updateFlag(toCurr);
+
+  updateExchangeRate();
+});
+
+fromCurr.addEventListener("change", updateExchangeRate);
+toCurr.addEventListener("change", updateExchangeRate);
 
 btn.addEventListener("click", (evt) => {
   evt.preventDefault();
